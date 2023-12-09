@@ -1,0 +1,89 @@
+@page "/"
+@using DocumentsApi
+@using Models.DocumentsApi
+@inject IDocumentsApiService DocumentsApiService
+
+<div class="row-layout documents-container">
+    <IgbGrid Data="@_documentsApiGetDocumentResponseDtoListServiceResponse?.Data" PrimaryKey="Id" DisplayDensity="DisplayDensity.Cosy" RowEditable="true" AllowFiltering="true" FilterMode="FilterMode.ExcelStyleFilter" AutoGenerate="false" RowAdded="ApiV1DocumentsRowAdded" RowEditDone="ApiV1DocumentsRowEditDone" RowDeleted="ApiV1DocumentsRowDeleted" class="ig-typography grid" documents-scope>
+        <IgbColumn Field="Id" DataType="GridColumnDataType.String" Header="id" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="Process" DataType="GridColumnDataType.String" Header="process" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="SubProcess" DataType="GridColumnDataType.String" Header="subProcess" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="Requirement" DataType="GridColumnDataType.String" Header="requirement" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="DetailedDocument" DataType="GridColumnDataType.String" Header="detailedDocument" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="Sequence" DataType="GridColumnDataType.Number" Header="sequence" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="DateCreated" DataType="GridColumnDataType.Date" Header="dateCreated" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbColumn Field="DateUpdated" DataType="GridColumnDataType.Date" Header="dateUpdated" Sortable="true" Selectable="false"></IgbColumn>
+        <IgbActionStrip>
+            <IgbGridPinningActions></IgbGridPinningActions>
+            <IgbGridEditingActions AddRow="true"></IgbGridEditingActions>
+        </IgbActionStrip>
+    </IgbGrid>
+</div>
+
+@code {
+    private GetDocumentResponseDtoListServiceResponse _documentsApiGetDocumentResponseDtoListServiceResponse;
+
+    private async void ApiV1DocumentsRowAdded(IgbRowDataEventArgs args)
+    {
+        var getDocumentResponseDtoServiceResponse = (GetDocumentResponseDtoServiceResponse)args.Detail.Data;
+        if (getDocumentResponseDtoServiceResponse != null)
+        {
+            var result = await DocumentsApiService.PostGetDocumentResponseDtoServiceResponse(getDocumentResponseDtoServiceResponse);
+            if (result != null)
+            {
+                _documentsApiGetDocumentResponseDtoListServiceResponse = await DocumentsApiService.GetGetDocumentResponseDtoListServiceResponse() ?? _documentsApiGetDocumentResponseDtoListServiceResponse;
+                StateHasChanged();
+            }
+            else
+            {
+                // TODO: handle errors here.
+            }
+        }
+    }
+
+    private async void ApiV1DocumentsRowEditDone(IgbGridEditDoneEventArgs args)
+    {
+        if(args.Detail.IsAddRow == false)
+        {
+            var getDocumentResponseDtoServiceResponse = (GetDocumentResponseDtoServiceResponse)args.Detail.RowData;
+            if (getDocumentResponseDtoServiceResponse != null)
+            {
+                var result = await DocumentsApiService.PutGetDocumentResponseDtoServiceResponse(getDocumentResponseDtoServiceResponse);
+                if (result != null)
+                {
+                    _documentsApiGetDocumentResponseDtoListServiceResponse = await DocumentsApiService.GetGetDocumentResponseDtoListServiceResponse() ?? _documentsApiGetDocumentResponseDtoListServiceResponse;
+                    StateHasChanged();
+                }
+                else
+                {
+                    // TODO: handle errors here.
+                }
+            }
+        }
+    }
+
+    private async void ApiV1DocumentsRowDeleted(IgbRowDataEventArgs args)
+    {
+        var primaryKey = args.Detail.PrimaryKey.ToString();
+        if (!string.IsNullOrEmpty(primaryKey))
+        {
+            var result = await DocumentsApiService.DeleteGetDocumentResponseDtoServiceResponse(primaryKey);
+            if (result != null)
+            {
+                _documentsApiGetDocumentResponseDtoListServiceResponse = await DocumentsApiService.GetGetDocumentResponseDtoListServiceResponse() ?? _documentsApiGetDocumentResponseDtoListServiceResponse;
+                StateHasChanged();
+            }
+            else
+            {
+                // TODO: handle errors here.
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _documentsApiGetDocumentResponseDtoListServiceResponse = await DocumentsApiService.GetGetDocumentResponseDtoListServiceResponse();
+
+        await base.OnInitializedAsync();
+    }
+}
